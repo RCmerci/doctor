@@ -1,0 +1,4 @@
+(library
+ (name        parser)
+ (libraries   core collector str)
+ (preprocess (pps ppx_deriving.show ppx_jane)))

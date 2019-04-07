@@ -1,0 +1,4 @@
+(library
+ (name        engine)
+ (libraries   core collector parser dumper analyzer)
+ (preprocess (pps ppx_let ppx_deriving.show)))
