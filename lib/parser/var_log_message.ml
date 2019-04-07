@@ -1,6 +1,9 @@
 open Core
+
 let ( >>= ) = Option.( >>= )
-let (>>|) = Option.(>>|)
+
+let ( >>| ) = Option.( >>| )
+
 (** [around ~duration ~uplines ~downlines ~exclusive_regexp index lines]
     [duration]: include line if its timestamp included in '[index] line's timestamp +- [duration]'
     [uplines]: max num of lines before [index] line
@@ -8,9 +11,8 @@ let (>>|) = Option.(>>|)
     [exclusive_regexp]: will stop add lines once found [exclusive_regexp]
 *)
 let around ?(duration = Time.Span.of_sec 3.) ?(uplines = 100)
-    ?(downlines = 100) ?exclusive_regexp index
-    (lines : Collector.Line.t list) =
-
+    ?(downlines = 100) ?exclusive_regexp index (lines : Collector.Line.t list)
+    =
   let center_time, _ =
     match List.nth lines index with Some l -> l | None -> (None, "")
   in
@@ -57,29 +59,28 @@ let around ?(duration = Time.Span.of_sec 3.) ?(uplines = 100)
     else aux next_up next_down next_upindex next_downindex
   in
   let up, down = aux [] [] (index - 1) (index + 1) in
-  match
-    List.nth lines index >>| fun l -> (List.append up (l :: down))
-  with
+  match List.nth lines index >>| fun l -> List.append up (l :: down) with
   | Some r -> r
   | None -> []
 
 let is_oom l : bool =
   String.substr_index l ~pattern:"out of memory" |> Option.is_some
 
-
 (** [oom_info index lines]
     Returns (killed_cgroup path, killed_pid, killed_process_name, aroundlines) option *)
 let oom_info index lines =
-  let around_lines  = around  ~exclusive_regexp: "out of memory" index lines in
-  let aux reg (_, content) = try Str.(search_forward (regexp reg) content 0) |> fun _ -> true with
-    | _ -> false
+  let around_lines = around ~exclusive_regexp:"out of memory" index lines in
+  let aux reg (_, content) =
+    try Str.(search_forward (regexp reg) content 0) |> fun _ -> true
+    with _ -> false
   in
-  (List.find around_lines
-     ~f:(aux "Task in \\(.*?\\) killed") >>| fun (_, content) -> (Str.matched_group 1 content))
+  List.find around_lines ~f:(aux "Task in \\(.*?\\) killed")
+  >>| (fun (_, content) -> Str.matched_group 1 content)
   >>= fun killed_cgroup ->
-  (List.find around_lines
-     ~f:(aux "Killed process \\([0-9]+?\\) (\\(.*?\\)) total-vm") >>| fun (_, content) ->
-   ((Str.matched_group 1 content), (Str.matched_group 2 content)))
+  List.find around_lines
+    ~f:(aux "Killed process \\([0-9]+?\\) (\\(.*?\\)) total-vm")
+  >>| (fun (_, content) ->
+        (Str.matched_group 1 content, Str.matched_group 2 content) )
   >>| fun (killed_pid, killed_process_name) ->
   (killed_cgroup, killed_pid, killed_process_name, around_lines)
 
@@ -90,29 +91,31 @@ module Var_log_message = struct
 
   type line = Collector.Line.t [@@deriving show]
 
-  type t =
-    {origin: line list; attributes: (Attr.t * (line list)) list} [@@deriving show]
+  type t = {origin: line list; attributes: (Attr.t * line list) list}
+  [@@deriving show]
 
   let attr_funcs index lines =
     let attr =
       List.nth lines index
       >>= fun l ->
-      (let (_, content) = l in
-      if is_oom content then Some (Attr.OOM ("", "", "")) else Some(Attr.OTHER))
-        >>= fun kind ->
-        match kind with
-        | Attr.OOM _ -> oom_info index lines >>| fun (a,b,c, aroundlines) -> (Attr.OOM (a,b,c), aroundlines)
-        | _ -> Some (Attr.OTHER, [l])
+      (let _, content = l in
+       if is_oom content then Some (Attr.OOM ("", "", "")) else Some Attr.OTHER)
+      >>= fun kind ->
+      match kind with
+      | Attr.OOM _ ->
+          oom_info index lines
+          >>| fun (a, b, c, aroundlines) -> (Attr.OOM (a, b, c), aroundlines)
+      | _ -> Some (Attr.OTHER, [l])
     in
     Option.value_exn attr
 
   let of_content (lines : line list) =
-    let attributes = List.mapi lines ~f:(fun i _ -> attr_funcs i lines) |>
-                     List.filter ~f:(fun (attr, _) -> match attr with
-                         | Attr.OTHER -> false
-                         | _ -> true)
+    let attributes =
+      List.mapi lines ~f:(fun i _ -> attr_funcs i lines)
+      |> List.filter ~f:(fun (attr, _) ->
+             match attr with Attr.OTHER -> false | _ -> true )
     in
-    {origin=lines; attributes}
+    {origin= lines; attributes}
 
   let attributes t = t.attributes
 end
