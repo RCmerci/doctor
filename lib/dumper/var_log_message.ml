@@ -14,8 +14,10 @@ module Var_log_message = struct
   let of_lines lines = lines
 
   let dump ?(path_prefix = Path.common_path_prefix) t =
-    Unix.mkdir_p path_prefix ;
-    let logpath = Filename.concat path_prefix path in
-    let out = Out_channel.create logpath in
-    List.map t ~f:snd |> Out_channel.output_lines out
+    try Unix.mkdir_p path_prefix
+    with _ ->
+      () ;
+      let logpath = Filename.concat path_prefix path in
+      let out = Out_channel.create logpath in
+      List.map t ~f:snd |> Out_channel.output_lines out
 end
