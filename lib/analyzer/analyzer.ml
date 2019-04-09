@@ -12,6 +12,7 @@ let analyzers =
   Map.of_alist_exn
     (module String)
     [ ( Var_log_message.Var_log_message.name
-      , (module Var_log_message.Var_log_message : analyzer) ) ]
+      , (module Var_log_message.Var_log_message : analyzer) )
+    ; (Df.Df.name, (module Df.Df : analyzer)) ]
 
 module Analyzer_result = Analyzer_result

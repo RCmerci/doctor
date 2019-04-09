@@ -19,8 +19,8 @@ module Var_log_message = struct
   let check_input_available () = Sys.file_exists_exn path
 
   (* ignore 'starttime' 'endtime', return all var/log/message content *)
-  let get_input ?(max_size = 100000L) (_ : Time.t option) (_ : Time.t option) :
-      t =
+  let get_input ?(max_size = 10240000L) (_ : Time.t option) (_ : Time.t option)
+      : t =
     let data =
       Util.read_lines path max_size |> List.map ~f:(fun l -> (None, l))
     in
@@ -34,8 +34,10 @@ module Var_log_message = struct
 
   let parse ?(parse_time = true) t =
     match t.parsed_time with
-    | true -> (t.data, t)
-    | false when not parse_time -> (t.data, t)
+    | true ->
+        (t.data, t)
+    | false when not parse_time ->
+        (t.data, t)
     | false ->
         let data =
           List.map ~f:(fun (_, l) -> (parse_var_log_message_time l, l)) t.data
