@@ -21,10 +21,17 @@ module type collector = sig
   (** [parse ?parse_time t] parse collected content *)
 end
 
+module CollectedMap = Map.Make (String)
+
 let collectors =
   Map.of_alist_exn
-    (module String)
+    (module CollectedMap.Key)
     [ ( Var_log_message.Var_log_message.name
-      , (module Var_log_message.Var_log_message : collector) ) ]
+      , (module Var_log_message.Var_log_message : collector) )
+    ; (Df.Df.name, (module Df.Df : collector)) ]
 
 module Var_log_message : collector = Var_log_message.Var_log_message
+
+module Df : collector = Df.Df
+
+type collected_map = Line.t list CollectedMap.t

@@ -7,9 +7,11 @@ module type parser = sig
 
   val name : string
 
-  val required : string
+  val required : string list
 
   val of_content : line list -> t
+
+  val of_collected_map : Collector.collected_map -> t
 
   val attributes : t -> Attr.attrs
 end
@@ -20,9 +22,12 @@ let parsers =
   Map.of_alist_exn
     (module ParsedMap.Key)
     [ ( Var_log_message.Var_log_message.name
-      , (module Var_log_message.Var_log_message : parser) ) ]
+      , (module Var_log_message.Var_log_message : parser) )
+    ; (Df.Df.name, (module Df.Df : parser)) ]
 
 module Var_log_message : parser = Var_log_message.Var_log_message
+
+module Df : parser = Df.Df
 
 module Attr = Attr
 

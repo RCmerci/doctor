@@ -20,6 +20,9 @@ let dumpers =
   Map.of_alist_exn
     (module String)
     [ ( Var_log_message.Var_log_message.name
-      , (module Var_log_message.Var_log_message : dumper) ) ]
+      , (module Var_log_message.Var_log_message : dumper) )
+    ; (Df.Df.name, (module Df.Df : dumper)) ]
 
 module Var_log_message : dumper = Var_log_message.Var_log_message
+
+module Df : dumper = Df.Df

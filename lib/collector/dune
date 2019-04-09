@@ -1,4 +1,4 @@
 (library
  (name collector)
- (libraries core)
+ (libraries core shexp.process)
  (preprocess (pps ppx_deriving.show)))

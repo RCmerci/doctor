@@ -5,10 +5,9 @@ let tests =
     , `Quick
     , fun () ->
         let attrs =
-          Testdata.var_log_message |> Collector.Var_log_message.of_string
-          |> Collector.Var_log_message.parse ~parse_time:true
-          |> snd |> Collector.Var_log_message.data
-          |> Parser.Var_log_message.of_content
-          |> Parser.Var_log_message.attributes
+          Util.get_attrs Testdata.var_log_message
+            (module Collector.Var_log_message)
+            (module Parser.Var_log_message)
         in
-        check bool "testdata.var_log_message" true (List.length attrs = 1) ) ]
+        check bool (Parser.Attr.show_attrs attrs) true (List.length attrs = 1)
+    ) ]

@@ -18,14 +18,16 @@ let around ?(duration = Time.Span.of_sec 3.) ?(uplines = 100)
   in
   let testf (l : Collector.Line.t) : Collector.Line.t option =
     ( match exclusive_regexp with
-    | None -> Some l
+    | None ->
+        Some l
     | Some r -> (
         let _, content = l in
         try Str.(search_forward (regexp r) content 0) |> fun _ -> None
         with _ -> Some l ) )
     >>= fun l ->
     match l with
-    | None, _ -> Some l
+    | None, _ ->
+        Some l
     | Some time, _ ->
         center_time
         >>= fun center_time' ->
@@ -52,16 +54,20 @@ let around ?(duration = Time.Span.of_sec 3.) ?(uplines = 100)
     in
     let next_down, next_downindex =
       match downline' with
-      | Some l -> (l :: down, downindex + 1)
-      | None -> (down, -1)
+      | Some l ->
+          (l :: down, downindex + 1)
+      | None ->
+          (down, -1)
     in
     if next_downindex = -1 && next_upindex = -1 then (up, List.rev down)
     else aux next_up next_down next_upindex next_downindex
   in
   let up, down = aux [] [] (index - 1) (index + 1) in
   match List.nth lines index >>| fun l -> List.append up (l :: down) with
-  | Some r -> r
-  | None -> []
+  | Some r ->
+      r
+  | None ->
+      []
 
 let is_oom l : bool =
   String.substr_index l ~pattern:"out of memory" |> Option.is_some
@@ -87,25 +93,28 @@ let oom_info index lines =
 module Var_log_message = struct
   let name = "var-log-message-parser"
 
-  let required = Collector.Var_log_message.name
+  let required = [Collector.Var_log_message.name]
 
   type line = Collector.Line.t [@@deriving show]
 
-  type t = {origin: line list; attributes: (Attr.t * line list) list}
-  [@@deriving show]
+  type t = {origin: line list; attributes: Attr.attrs} [@@deriving show]
 
   let attr_funcs index lines =
     let attr =
       List.nth lines index
       >>= fun l ->
-      (let _, content = l in
-       if is_oom content then Some (Attr.OOM ("", "", "")) else Some Attr.OTHER)
+      (let time, content = l in
+       if is_oom content then
+         Some (Attr.OOM (Option.value time ~default:(Time.now ()), "", "", ""))
+       else Some Attr.OTHER)
       >>= fun kind ->
       match kind with
-      | Attr.OOM _ ->
+      | Attr.OOM (time, _, _, _) ->
           oom_info index lines
-          >>| fun (a, b, c, aroundlines) -> (Attr.OOM (a, b, c), aroundlines)
-      | _ -> Some (Attr.OTHER, [l])
+          >>| fun (a, b, c, aroundlines) ->
+          (Attr.OOM (time, a, b, c), aroundlines)
+      | _ ->
+          Some (Attr.OTHER, [l])
     in
     Option.value_exn attr
 
@@ -116,6 +125,13 @@ module Var_log_message = struct
              match attr with Attr.OTHER -> false | _ -> true )
     in
     {origin= lines; attributes}
+
+  let of_collected_map (m : Collector.collected_map) =
+    assert (Collector.CollectedMap.mem m Collector.Var_log_message.name) ;
+    let lines =
+      Collector.CollectedMap.find_exn m Collector.Var_log_message.name
+    in
+    of_content lines
 
   let attributes t = t.attributes
 end

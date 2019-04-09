@@ -10,7 +10,7 @@ let parse_var_log_message_time (s : string) : Time.t option =
   with _ -> None
 
 module Var_log_message = struct
-  let path = "/var/log/message"
+  let path = "/var/log/messages"
 
   let name = "var-log-message-collector"
 

@@ -3,15 +3,14 @@ open Option.Let_syntax
 
 let option_of_bool b = match b with true -> Some () | false -> None
 
+type notfound_list = string list [@@deriving show]
+
 let collect () =
-  Map.map Collector.collectors ~f:(fun m ->
-      let data =
-        let module M = (val m : Collector.collector) in
-        let%map () = option_of_bool (M.check_input_available ()) in
-        let inputs = M.get_input None None in
-        inputs |> M.parse |> fst
-      in
-      match data with Some v -> v | None -> [] )
+  Map.filter_map Collector.collectors ~f:(fun m ->
+      let module M = (val m : Collector.collector) in
+      let%map () = option_of_bool (M.check_input_available ()) in
+      let inputs = M.get_input None None in
+      inputs |> M.parse |> fst )
 
 let dump data =
   Map.map Dumper.dumpers ~f:(fun m ->
@@ -21,15 +20,14 @@ let dump data =
   |> ignore
 
 let parse data =
-  Map.map Parser.parsers ~f:(fun m ->
-      let attrs =
-        let module M = (val m : Parser.parser) in
-        let%map lines = Map.find data M.required in
-        M.of_content lines |> M.attributes
+  Map.filter_map Parser.parsers ~f:(fun m ->
+      let module M = (val m : Parser.parser) in
+      let (notfound : notfound_list) =
+        List.filter M.required ~f:(fun r -> not (Map.mem data r))
       in
-      match attrs with Some v -> v | None -> [] )
-
-type notfound_list = string list [@@deriving show]
+      match notfound with
+      | [] -> Some (M.of_collected_map data |> M.attributes)
+      | _ -> None )
 
 let analyze data =
   Map.map Analyzer.analyzers ~f:(fun m ->

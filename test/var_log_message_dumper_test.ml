@@ -2,7 +2,7 @@ open Alcotest
 open Core
 
 let tests =
-  [ ( "var/log/message"
+  [ ( "var/log/messages"
     , `Quick
     , fun () ->
         let _ = try Sys.remove "./var_log_message.txt" with _ -> () in

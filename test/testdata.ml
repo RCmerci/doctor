@@ -103,3 +103,14 @@ let var_log_message =
      1(veth78e9c4c) entered disabled state\n\
      Apr  2 18:05:07 ucuducdc-dev-public-010168000078 kernel: device \
      veth78e9c4c left promiscuous mode"
+
+let df =
+  "Filesystem      Size  Used Avail Use% Mounted on\n\
+   /dev/xvda1       40G   26G   12G  69% /\n\
+   devtmpfs        487M     0  487M   0% /dev\n\
+   tmpfs           496M   12K  496M   1% /dev/shm\n\
+   tmpfs           496M  808K  495M   1% /run\n\
+   tmpfs           496M     0  496M   0% /sys/fs/cgroup\n\
+   tmpfs           100M     0  100M   0% /run/user/1018\n\
+   tmpfs           100M     0  100M   0% /run/user/0\n\
+   tmpfs           100M     0  100M   0% /run/user/1000"
