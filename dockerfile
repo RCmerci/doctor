@@ -5,3 +5,4 @@ RUN opam depext -i core
 RUN opam install dune
 RUN opam install ppx_deriving
 RUN opam install shexp
+RUN opam install lwt_ppx

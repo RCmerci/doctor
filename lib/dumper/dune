@@ -1,3 +1,4 @@
 (library
  (name        dumper)
- (libraries   core collector))
+ (libraries   core collector)
+ (preprocess (pps lwt_ppx ppx_deriving.show)))

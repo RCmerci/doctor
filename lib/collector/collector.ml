@@ -6,10 +6,10 @@ module type collector = sig
 
   val name : string
 
-  val check_input_available : unit -> bool
+  val check_input_available : unit -> bool Lwt.t
   (** [check_input_available ()] check input method available*)
 
-  val get_input : ?max_size:int64 -> Time.t option -> Time.t option -> t
+  val get_input : ?max_size:int64 -> Time.t option -> Time.t option -> t Lwt.t
   (** [get_input ~max_size start end]
       [max_size]: max char num *)
 
@@ -17,7 +17,7 @@ module type collector = sig
 
   val data : t -> Line.t list
 
-  val parse : ?parse_time:bool -> t -> Line.t list * t
+  val parse : ?parse_time:bool -> t -> (Line.t list * t) Lwt.t
   (** [parse ?parse_time t] parse collected content *)
 end
 

@@ -1,7 +1,7 @@
 open Core
 
 module type dumper = sig
-  type t
+  type t [@@deriving show]
 
   val path : string
 
@@ -13,7 +13,7 @@ module type dumper = sig
 
   val of_lines : Collector.Line.t list -> t
 
-  val dump : ?path_prefix:string -> t -> unit
+  val dump : ?path_prefix:string -> t -> unit Lwt.t
 end
 
 let dumpers =
