@@ -1,8 +1,8 @@
 open Core
 
-let main_route =
-  let%lwt collected = Engine.collect () in
-  let%lwt () = Engine.dump collected in
+let main_route mv =
+  let%lwt collected = Engine.collect mv in
+  let%lwt () = Engine.dump collected mv in
   let parsed = Engine.parse collected in
   let analyzed = Engine.analyze parsed in
   let r =
@@ -19,4 +19,7 @@ let main_route =
   in
   Lwt.return r
 
-let _ = main_route |> Lwt_main.run
+let _ =
+  let mv = Lwt_mvar.create_empty () in
+  Lwt.async (fun () -> Pp.print_thread mv (Time.now ())) ;
+  main_route mv |> Lwt_main.run

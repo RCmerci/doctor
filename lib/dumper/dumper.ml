@@ -13,7 +13,7 @@ module type dumper = sig
 
   val of_lines : Collector.Line.t list -> t
 
-  val dump : ?path_prefix:string -> t -> unit Lwt.t
+  val dump : ?path_prefix:string -> Pp.t -> t -> unit Lwt.t
 end
 
 let dumpers =

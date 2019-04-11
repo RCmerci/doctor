@@ -18,14 +18,23 @@ module Var_log_message = struct
 
   type t = {parsed_time: bool; data: Line.t list}
 
-  let check_input_available () = return (Sys.file_exists_exn path)
+  let check_input_available (mv : Pp.t) =
+    let y_or_n = Sys.file_exists_exn path in
+    let%lwt () =
+      Lwt_mvar.put mv
+        {part= name; detail= Printf.sprintf "check available %b" y_or_n}
+    in
+    return y_or_n
 
   (* ignore 'starttime' 'endtime', return all var/log/message content *)
   let get_input ?(max_size = 10240000L) (_ : Time.t option) (_ : Time.t option)
-      : t Lwt.t =
+      (mv : Pp.t) : t Lwt.t =
+    let%lwt _ = Lwt_mvar.put mv {part= name; detail= "collecting data ..."} in
     let%lwt data = Util.read_lines path max_size in
     let data' = List.map data ~f:(fun l -> (None, l)) in
-    return {parsed_time= false; data= data'}
+    let r = {parsed_time= false; data= data'} in
+    let%lwt _ = Lwt_mvar.put mv {part= name; detail= "collecting data done"} in
+    return r
 
   let of_string s : t =
     { parsed_time= false

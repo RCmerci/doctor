@@ -1,0 +1,4 @@
+(library
+ (name        pp)
+ (libraries   core lwt lwt.unix)
+ (preprocess (pps ppx_let ppx_deriving.show lwt_ppx)))

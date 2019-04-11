@@ -6,10 +6,11 @@ module type collector = sig
 
   val name : string
 
-  val check_input_available : unit -> bool Lwt.t
+  val check_input_available : Pp.t -> bool Lwt.t
   (** [check_input_available ()] check input method available*)
 
-  val get_input : ?max_size:int64 -> Time.t option -> Time.t option -> t Lwt.t
+  val get_input :
+    ?max_size:int64 -> Time.t option -> Time.t option -> Pp.t -> t Lwt.t
   (** [get_input ~max_size start end]
       [max_size]: max char num *)
 

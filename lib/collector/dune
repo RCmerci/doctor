@@ -1,4 +1,4 @@
 (library
  (name collector)
- (libraries core shexp.process lwt lwt.unix)
+ (libraries core pp shexp.process lwt lwt.unix)
  (preprocess (pps ppx_deriving.show lwt_ppx)))
