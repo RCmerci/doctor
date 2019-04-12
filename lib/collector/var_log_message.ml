@@ -1,15 +1,14 @@
 open Core
 open Lwt
 
-let parse_var_log_message_time (s : string) : Time.t option Lwt.t =
-  ( try
-      Some
-        (Time.parse
-           (Printf.sprintf "%d %s" Util.current_year s)
-           ~fmt:"%Y %b %d %T"
-           ~zone:(Time.Zone.of_utc_offset ~hours:8))
-    with _ -> None )
-  |> return
+let parse_var_log_message_time (s : string) : Time.t option =
+  try
+    Some
+      (Time.parse
+         (Printf.sprintf "%d %s" Util.current_year s)
+         ~fmt:"%Y %b %d %T"
+         ~zone:(Time.Zone.of_utc_offset ~hours:8))
+  with _ -> None
 
 module Var_log_message = struct
   let path = "/var/log/messages"
@@ -42,19 +41,27 @@ module Var_log_message = struct
 
   let data t = t.data
 
-  let parse ?(parse_time = true) t =
-    match t.parsed_time with
-    | true ->
-        return (t.data, t)
-    | false when not parse_time ->
-        return (t.data, t)
-    | false ->
-        let%lwt data =
-          Lwt_list.map_p
-            (fun (_, l) ->
-              let%lwt time = parse_var_log_message_time l in
-              return (time, l) )
-            t.data
-        in
-        return (data, {parsed_time= true; data})
+  let parse ?(parse_time = true) (mv : Pp.t option) t =
+    let mvar_put =
+      match mv with Some mv' -> Lwt_mvar.put mv' | None -> fun _ -> return ()
+    in
+    let%lwt _ = mvar_put {part= name; detail= "parsing data timestamp ..."} in
+    let%lwt r =
+      match t.parsed_time with
+      | true ->
+          return (t.data, t)
+      | false when not parse_time ->
+          return (t.data, t)
+      | false ->
+          let%lwt data =
+            Lwt_list.map_p
+              (fun (_, l) ->
+                let time = parse_var_log_message_time l in
+                return (time, l) )
+              t.data
+          in
+          return (data, {parsed_time= true; data})
+    in
+    let%lwt _ = mvar_put {part= name; detail= "parse data timestamp done"} in
+    return r
 end

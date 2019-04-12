@@ -34,7 +34,7 @@ module Df = struct
 
   let data t = t
 
-  let parse ?parse_time t =
+  let parse ?parse_time _ t =
     let _ = parse_time in
     return (t, t)
 end

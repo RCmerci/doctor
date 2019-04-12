@@ -18,7 +18,7 @@ module type collector = sig
 
   val data : t -> Line.t list
 
-  val parse : ?parse_time:bool -> t -> (Line.t list * t) Lwt.t
+  val parse : ?parse_time:bool -> Pp.t option -> t -> (Line.t list * t) Lwt.t
   (** [parse ?parse_time t] parse collected content *)
 end
 
@@ -29,10 +29,13 @@ let collectors =
     (module CollectedMap.Key)
     [ ( Var_log_message.Var_log_message.name
       , (module Var_log_message.Var_log_message : collector) )
-    ; (Df.Df.name, (module Df.Df : collector)) ]
+    ; (Df.Df.name, (module Df.Df : collector))
+    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : collector)) ]
 
 module Var_log_message : collector = Var_log_message.Var_log_message
 
 module Df : collector = Df.Df
+
+module Sar_load : collector = Sar_load.Sar_load
 
 type collected_map = Line.t list CollectedMap.t

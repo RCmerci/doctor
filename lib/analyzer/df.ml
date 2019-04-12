@@ -5,7 +5,6 @@ module Df = struct
 
   let required = [Parser.Df.name]
 
-  (* let analyze : Parser.parsed_map -> Analyzer_result.t *)
   let analyze (m : Parser.parsed_map) : Analyzer_result.t =
     assert (
       not (List.exists required ~f:(fun r -> not (Parser.ParsedMap.mem m r)))

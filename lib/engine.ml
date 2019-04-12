@@ -12,7 +12,7 @@ let collect (mv : Pp.t) =
          let%lwt available = M.check_input_available mv in
          match available with
          | true ->
-             M.get_input None None mv >>= M.parse >|= fst
+             M.get_input None None mv >>= M.parse (Some mv) >|= fst
              >|= Tuple2.create name >|= Option.some
          | false ->
              return None )
@@ -25,7 +25,7 @@ let dump data (mv : Pp.t) =
          let module M = (val m : Dumper.dumper) in
          match Option.(Map.find data M.required >>| M.of_lines) with
          | Some t ->
-             M.dump mv t
+             M.dump (Some mv) t
          | None ->
              return_unit )
   >|= ignore

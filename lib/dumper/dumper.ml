@@ -9,11 +9,9 @@ module type dumper = sig
 
   val required : string
 
-  val of_string_list : string list -> t
-
   val of_lines : Collector.Line.t list -> t
 
-  val dump : ?path_prefix:string -> Pp.t -> t -> unit Lwt.t
+  val dump : ?path_prefix:string -> Pp.t option -> t -> unit Lwt.t
 end
 
 let dumpers =
@@ -21,8 +19,11 @@ let dumpers =
     (module String)
     [ ( Var_log_message.Var_log_message.name
       , (module Var_log_message.Var_log_message : dumper) )
-    ; (Df.Df.name, (module Df.Df : dumper)) ]
+    ; (Df.Df.name, (module Df.Df : dumper))
+    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : dumper)) ]
 
 module Var_log_message : dumper = Var_log_message.Var_log_message
 
 module Df : dumper = Df.Df
+
+module Sar_load : dumper = Sar_load.Sar_load

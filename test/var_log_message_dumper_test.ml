@@ -12,7 +12,7 @@ let tests =
           |> (fun o ->
                let _ = print_string (Dumper.Var_log_message.show o) in
                o )
-          |> Dumper.Var_log_message.dump ~path_prefix:"."
+          |> Dumper.Var_log_message.dump ~path_prefix:"." None
           |> Lwt_main.run
         in
         check bool "./var_log_message.txt not exists" true

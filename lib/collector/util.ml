@@ -15,10 +15,11 @@ let timepair (starttime : Time.t option) (endtime : Time.t option) =
   | Some s, Some e ->
       (s, e)
 
-let current_year =
-  Time.now ()
-  |> Time.to_date ~zone:(Time.Zone.of_utc_offset ~hours:8)
-  |> Date.year
+let today = Date.today ~zone:(Time.Zone.of_utc_offset ~hours:8)
+
+let today_str = Date.to_string today
+
+let current_year = Date.year today
 
 let read_lines filepath max_size =
   let open Lwt_io in
