@@ -1,1 +1,2 @@
-type t = {info: string list; err: string option} [@@deriving show]
+type t = {info: (string * string list) list; err: string option}
+[@@deriving show]

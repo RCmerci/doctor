@@ -38,12 +38,15 @@ module Sar_load = struct
     (* drop first title line *)
     let attributes =
       List.filter_map lines' ~f:(fun line ->
-          let _, l = line in
-          match parse_sar_load_line l with
+          let time, l = line in
+          match time with
           | None ->
               None (* skip *)
-          | Some sar_load_line ->
-              Some (Attr.SAR_LOAD sar_load_line, [line]) )
+          | Some _ ->
+              Option.(
+                parse_sar_load_line l
+                >>| fun sar_load_line -> (Attr.SAR_LOAD sar_load_line, [line]))
+      )
     in
     {attributes}
 

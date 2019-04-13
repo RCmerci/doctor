@@ -13,10 +13,11 @@ module Var_log_message = struct
           | Parser.Attr.OOM
               (time, killed_cgroup_path, killed_pid, killed_process_name) ->
               Some
-                (Printf.sprintf "[%s] OOM pid: %s, process: %s, cgroup: %s"
-                   (Time.format time "%m-%d %T"
-                      ~zone:(Time.Zone.of_utc_offset ~hours:8))
-                   killed_pid killed_process_name killed_cgroup_path)
+                ( Printf.sprintf "[%s] OOM pid: %s, process: %s, cgroup: %s"
+                    (Time.format time "%m-%d %T"
+                       ~zone:(Time.Zone.of_utc_offset ~hours:8))
+                    killed_pid killed_process_name killed_cgroup_path
+                , [] )
           | _ ->
               None )
     in

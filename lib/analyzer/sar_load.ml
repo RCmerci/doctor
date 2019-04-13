@@ -33,21 +33,24 @@ module Sar_load = struct
       in
       List.filter_mapi attrs ~f:(fun index (attr, _) ->
           match attr with
-          | Parser.Attr.SAR_LOAD sar_load -> (
+          | Parser.Attr.SAR_LOAD sar_load ->
               if sar_load.ldavg_1 <= 40. then None
               else
-                let around_attrs = around_attrlines index attrs in
-                match
-                  List.max_elt around_attrs ~compare:(fun (e1, _) (e2, _) ->
-                      let load1 = only_care_sar_load e1 in
-                      let load2 = only_care_sar_load e2 in
-                      load1.ldavg_1 -. load2.ldavg_1 |> Int.of_float )
-                with
-                | None ->
-                    None
-                | Some (max_attr, _) ->
-                    let sar_load = only_care_sar_load max_attr in
-                    Some (Parser.Attr.show_sar_load_line sar_load) )
+                let around_attrs =
+                  around_attrlines ~upsize:5 ~downsize:5 index attrs
+                in
+                if
+                  List.exists around_attrs ~f:(fun (e, _) ->
+                      let load = only_care_sar_load e in
+                      load.ldavg_1 > sar_load.ldavg_1 )
+                then None
+                else
+                  let detail_lines =
+                    List.(
+                      map around_attrs ~f:(fun (_, ls) -> map ls ~f:snd)
+                      |> join)
+                  in
+                  Some (Parser.Attr.show_sar_load_line sar_load, detail_lines)
           | _ ->
               None )
     in
