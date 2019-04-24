@@ -24,13 +24,16 @@ let parsers =
     [ ( Var_log_message.Var_log_message.name
       , (module Var_log_message.Var_log_message : parser) )
     ; (Df.Df.name, (module Df.Df : parser))
-    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : parser)) ]
+    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : parser))
+    ; (Sar_blkio.Sar_blkio.name, (module Sar_blkio.Sar_blkio : parser)) ]
 
 module Var_log_message : parser = Var_log_message.Var_log_message
 
 module Df : parser = Df.Df
 
 module Sar_load : parser = Sar_load.Sar_load
+
+module Sar_blkio : parser = Sar_blkio.Sar_blkio
 
 module Attr = Attr
 

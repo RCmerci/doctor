@@ -73,9 +73,19 @@ module Sar_load =
       let path = "sar_load.txt"
     end)
 
+module Sar_blkio =
+  Dumper_builder
+    (Collector.Sar_blkio)
+    (struct
+      let name = "sar-blkio-dumper"
+
+      let path = "sar_blkio.txt"
+    end)
+
 let dumpers =
   Map.of_alist_exn
     (module String)
     [ (Var_log_message.name, (module Var_log_message : dumper))
     ; (Df.name, (module Df : dumper))
-    ; (Sar_load.name, (module Sar_load : dumper)) ]
+    ; (Sar_load.name, (module Sar_load : dumper))
+    ; (Sar_blkio.name, (module Sar_blkio : dumper)) ]

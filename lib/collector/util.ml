@@ -30,3 +30,14 @@ let read_lines filepath max_size =
       (* drop first line, because it is partial *)
       let%lwt _ = read_line f in
       Lwt_stream.to_list (read_lines f) )
+
+(* e.g. 's' 11:42:01 PM *)
+let parse_sar_time s =
+  let open Time in
+  try
+    Some
+      (parse
+         (String.concat [today_str; " "; s])
+         ~fmt:"%F %r"
+         ~zone:(Zone.of_utc_offset ~hours:8))
+  with _ -> None

@@ -14,3 +14,5 @@ let rec print_thread (mv : t) (start_time : Time.t) =
     >>= fun _ -> Lwt_io.(flush stdout)
   in
   print_thread mv start_time
+
+let log (mv : t) header detail = Lwt_mvar.put mv {part= header; detail}

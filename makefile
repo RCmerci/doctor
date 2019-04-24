@@ -13,3 +13,5 @@ linux-shell: build
 build:
 	docker build -t doctor-build .
 	rsync -a $(shell pwd) linux_build --exclude linux_build  --exclude _build --exclude test
+test:
+	dune runtest

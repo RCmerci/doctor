@@ -30,12 +30,15 @@ let collectors =
     [ ( Var_log_message.Var_log_message.name
       , (module Var_log_message.Var_log_message : collector) )
     ; (Df.Df.name, (module Df.Df : collector))
-    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : collector)) ]
+    ; (Sar_load.Sar_load.name, (module Sar_load.Sar_load : collector))
+    ; (Sar_blkio.Sar_blkio.name, (module Sar_blkio.Sar_blkio : collector)) ]
 
 module Var_log_message : collector = Var_log_message.Var_log_message
 
 module Df : collector = Df.Df
 
 module Sar_load : collector = Sar_load.Sar_load
+
+module Sar_blkio : collector = Sar_blkio.Sar_blkio
 
 type collected_map = Line.t list CollectedMap.t
